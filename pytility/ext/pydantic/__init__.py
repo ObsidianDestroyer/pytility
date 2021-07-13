@@ -26,3 +26,24 @@ def models_compare(
             result.append((new, old, field))
             continue
     return result
+
+
+def get_model_attribute(
+    model: BaseModel, attr_name: String,
+) -> String:
+    for field in model.__fields__:
+        attr = getattr(model, field, None)
+        if isinstance(attr, BaseModel):
+            try:
+                return get_model_attribute(attr, attr_name)
+            except AttributeError:
+                continue
+
+        if attr is not None:
+            if field == attr_name:
+                return attr
+            continue
+        raise AttributeError(
+            f'Failed to get attribute "{attr_name}" '
+            f'on model {type(model)}',
+        )
